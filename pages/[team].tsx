@@ -107,6 +107,8 @@ export default function Home() {
               },
             });
           });
+        } else if (newClue?.data?.status === "completed") {
+          return true;
         }
         return false;
       });
