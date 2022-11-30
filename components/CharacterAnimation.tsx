@@ -19,8 +19,8 @@ export const CharacterAnimation = (props: any) => {
   return (
     <div ref={ref}>
       <Image
-        width={23}
-        height={34}
+        width={props.isRunning ? 23 : 21}
+        height={props.isRunning ? 34 : 35}
         alt=""
         src={props.isRunning ? "/run outline.gif" : "/idle outline.gif"}
         style={{ transform: `scale(${bounds.width / 160})` }}

@@ -2,7 +2,7 @@ import { Map, Marker } from "pigeon-maps";
 import { osm } from "pigeon-maps/providers";
 import { useGeolocated } from "react-geolocated";
 import { animated, useSpring } from "@react-spring/web";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Menu } from "../components/Menu";
 import API from "../api";
 import Head from "next/head";
@@ -10,6 +10,9 @@ import { useRouter } from "next/router";
 import useSWR from "swr";
 import Script from "next/script";
 import Image from "next/image";
+import haversine from "haversine-distance";
+
+const RANGE_METER = 20;
 
 export default function Home() {
   const { query } = useRouter();
@@ -23,13 +26,35 @@ export default function Home() {
     watchPosition: true,
   });
 
-  const currentPos: [number, number] = [
-    coords?.latitude ?? 0,
-    coords?.longitude ?? 0,
-  ];
+  const currentPos: [number, number] = useMemo(
+    () => [coords?.latitude ?? 0, coords?.longitude ?? 0],
+    [coords]
+  );
 
   const [center, setCenter] = useState(currentPos);
   const [nextLocation, setNextLocation] = useState(currentPos);
+
+  const isWithinRange = useMemo(() => {
+    if (
+      typeof currentPos[0] === "number" &&
+      typeof currentPos[1] === "number" &&
+      !Number.isNaN(currentPos[0]) &&
+      !Number.isNaN(currentPos[1])
+    ) {
+      const distance = haversine(
+        {
+          lat: currentPos[0],
+          lon: currentPos[1],
+        },
+        {
+          lat: nextLocation[0],
+          lon: nextLocation[1],
+        }
+      );
+      return distance / 1000 <= RANGE_METER;
+    }
+    return false;
+  }, [currentPos, nextLocation]);
 
   const [show, setShow] = useState(false);
 
@@ -49,6 +74,18 @@ export default function Home() {
     [show]
   );
 
+  const updateNextLocation = useCallback<
+    (l: string) => [number, number] | null
+  >((location) => {
+    const decoded = window.OpenLocationCode.decode(location);
+    if (decoded) {
+      const { latitudeCenter: lat, longitudeCenter: lon } = decoded;
+      setNextLocation([lat, lon]);
+      return [lat, lon];
+    }
+    return null;
+  }, []);
+
   const onSubmit = async (clueId: string, answer: string) => {
     const answerRes = await API.answerClue(clueId, answer);
     if (answerRes?.success) {
@@ -61,15 +98,12 @@ export default function Home() {
                 y: "48%",
               },
               onResolve: () => {
-                const decoded = window.OpenLocationCode.decode(clue.location);
-                if (decoded) {
-                  const { latitudeCenter: lat, longitudeCenter: lon } = decoded;
-                  setCenter([lat, lon]);
-                  setNextLocation([lat, lon]);
+                const coords = updateNextLocation(clue.location);
+                if (coords) {
+                  setCenter(coords);
                   r(true);
-                } else {
-                  r(false);
                 }
+                r(false);
               },
             });
           });
@@ -85,6 +119,12 @@ export default function Home() {
   useEffect(() => {
     setCenter([coords?.latitude ?? 0, coords?.longitude ?? 0]);
   }, [coords]);
+
+  useEffect(() => {
+    if (clue?.clue?.location) {
+      updateNextLocation(clue.clue.location);
+    }
+  }, [clue, updateNextLocation]);
 
   return (
     <div className="overflow-hidden flex w-screen h-screen relative">
@@ -106,10 +146,10 @@ export default function Home() {
         }}
         onClick={() => setRunning(true)}
       >
+        <Marker anchor={nextLocation} color="#e03e5e" width={56}></Marker>
         <Marker anchor={currentPos}>
           <Image src="/idle outline.gif" width={21} height={35} alt="" />
         </Marker>
-        <Marker anchor={nextLocation} color="#e03e5e" width={56}></Marker>
       </Map>
       <animated.div onClick={() => setShow((s) => !s)} style={springs}>
         <div className="md:hidden">
@@ -117,8 +157,10 @@ export default function Home() {
             clue={clue}
             onSubmit={onSubmit}
             recenter={() => setCenter(currentPos)}
+            goToDestination={() => setCenter(nextLocation)}
             isRunning={running}
             setRunning={setRunning}
+            isWithinRange={isWithinRange}
           />
         </div>
       </animated.div>
@@ -127,8 +169,10 @@ export default function Home() {
           clue={clue}
           onSubmit={onSubmit}
           recenter={() => setCenter(currentPos)}
+          goToDestination={() => setCenter(nextLocation)}
           isRunning={running}
           setRunning={setRunning}
+          isWithinRange={isWithinRange}
         />
       </div>
     </div>

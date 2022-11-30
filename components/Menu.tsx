@@ -22,8 +22,12 @@ export const Menu = (props: any) => {
           Question
         </p>
         <label className="font-medium mt-2 text-center text-xl md:text-2xl">
-          {clue?.clue?.question ? (
-            <>&ldquo;{clue.clue.question}&rdquo;</>
+          {clue?.status !== "completed" && clue?.clue?.question ? (
+            props.isWithinRange ? (
+              <>&ldquo;{clue.clue.question}&rdquo;</>
+            ) : (
+              "Go to the location to reveal question"
+            )
           ) : (
             "You've answered all questions"
           )}
@@ -95,13 +99,19 @@ export const Menu = (props: any) => {
                     key={`clue-${i}`}
                     num={i + 1}
                     title={
-                      isCurrentQuestion
-                        ? clue.clue?.location_name
-                        : clue.finished?.[i]?.location_name ??
-                          "Unknown location"
+                      isCurrentQuestion ? (
+                        <span
+                          onClick={props.goToDestination}
+                          className="text-brand underline cursor-pointer"
+                        >
+                          {clue.clue?.location_name}
+                        </span>
+                      ) : (
+                        clue.finished?.[i]?.location_name ?? "Unknown location"
+                      )
                     }
                   >
-                    {isCurrentQuestion
+                    {isCurrentQuestion || !props.isWithinRange
                       ? "Go to this location to unlock the question"
                       : `Q: ${clue.finished?.[i]?.question ?? "????"}`}
                     <br />
@@ -111,6 +121,14 @@ export const Menu = (props: any) => {
                   </Stepper.Step>
                 );
               })}
+            <Stepper.Step
+              num={5}
+              title={clue.status === "completed" ? "Congrats" : "????"}
+            >
+              {clue.status === "completed"
+                ? "You have completed this challenge, your team can return to the hotel"
+                : null}
+            </Stepper.Step>
           </Stepper.Container>
         ) : null}
       </div>
