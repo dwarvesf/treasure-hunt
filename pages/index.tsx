@@ -72,6 +72,18 @@ export default function Home() {
           <div className="mt-auto">
             <CharacterAnimation scale={3} isRunning />
           </div>
+          <p className="absolute bottom-1 right-1 z-10 text-xs">
+            Credit to{" "}
+            <a
+              className="underline"
+              href="https://jesse-m.itch.io/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Jesse Munguia
+            </a>{" "}
+            for assets
+          </p>
         </div>
       </div>
     </div>
