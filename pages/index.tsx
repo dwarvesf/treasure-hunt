@@ -7,8 +7,7 @@ import { CharacterAnimation } from "../components/CharacterAnimation";
 import Marquee from "react-fast-marquee";
 
 export default function Home() {
-  const { coords, isGeolocationEnabled, isGeolocationAvailable } =
-    useGeolocated();
+  const { coords } = useGeolocated();
 
   return (
     <div className="overflow-hidden flex w-screen h-screen relative">
@@ -29,13 +28,11 @@ export default function Home() {
             .fill(0)
             .map((_, i) => {
               return (
-                <div className="absolute top-0 left-0 h-full w-full">
-                  <Marquee
-                    key={`parallax-bg-${i}`}
-                    gradient={false}
-                    speed={(i + 1) * 15}
-                    play
-                  >
+                <div
+                  key={`parallax-bg-${i}`}
+                  className="absolute top-0 left-0 h-full w-full"
+                >
+                  <Marquee gradient={false} speed={(i + 1) * 15} play>
                     <Image
                       width={768}
                       height={432}
@@ -52,7 +49,7 @@ export default function Home() {
           <div className="mt-5 mx-auto w-4/5 relative z-10 rounded bg-emerald-900 bg-opacity-[85%] p-3 flex justify-between">
             <div className="flex flex-col">
               <p className="underline font-medium text-lg">
-                To play this game, you'll need:
+                To play this game, you&apos;ll need:
               </p>
               <ul className="text-sm mt-2 list-disc list-inside">
                 <li>A browser that support geolocation</li>

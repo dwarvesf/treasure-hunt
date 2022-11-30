@@ -12,7 +12,7 @@ import Script from "next/script";
 import Image from "next/image";
 import haversine from "haversine-distance";
 
-const RANGE_METER = 20;
+const RANGE_METER = 200;
 
 export default function Home() {
   const { query } = useRouter();
@@ -51,7 +51,8 @@ export default function Home() {
           lon: nextLocation[1],
         }
       );
-      return distance / 1000 <= RANGE_METER;
+      console.log(distance);
+      return distance <= RANGE_METER;
     }
     return false;
   }, [currentPos, nextLocation]);
