@@ -1,8 +1,17 @@
-const BASE_URL = "https://treasure-hunt.fly.dev";
+import { Md5 } from "ts-md5";
+
+const BASE_URL = "https://df-treasure-hunt-2022.fly.dev";
 
 function getTeam(id?: string | number) {
   if (!id) return null;
   return fetch(`${BASE_URL}/api/teams/${id}`)
+    .then((res) => res.json())
+    .catch(() => null);
+}
+
+function getQuestion(teamId: string, questionCode: string) {
+  const hash = Md5.hashStr(`${questionCode}${teamId}`);
+  return fetch(`${BASE_URL}/api/questions/${hash}`)
     .then((res) => res.json())
     .catch(() => null);
 }
@@ -20,5 +29,5 @@ function answerClue(clueId: string | number, answer: string) {
     .catch(() => null);
 }
 
-const api = { getTeam, answerClue };
+const api = { getTeam, getQuestion, answerClue };
 export default api;

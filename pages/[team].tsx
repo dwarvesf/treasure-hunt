@@ -11,8 +11,9 @@ import useSWR from "swr";
 import Script from "next/script";
 import Image from "next/image";
 import haversine from "haversine-distance";
+import { useSwipeable } from "react-swipeable";
 
-const RANGE_METER = 200;
+const RANGE_METER = 50;
 
 export default function Home() {
   const { query } = useRouter();
@@ -57,6 +58,22 @@ export default function Home() {
     return false;
   }, [currentPos, nextLocation]);
 
+  const { data: currentQuestion } = useSWR(
+    [
+      "/questions",
+      isWithinRange,
+      query.team,
+      teamRes?.data?.clue?.question_code,
+    ],
+    async (_, isWithinRange, teamId, questionCode) => {
+      if (isWithinRange && teamId && questionCode) {
+        const res = await API.getQuestion(teamId as string, questionCode);
+        return res?.data?.content ?? null;
+      }
+      return null;
+    }
+  );
+
   const [show, setShow] = useState(false);
 
   const [springs, api] = useSpring(
@@ -69,7 +86,7 @@ export default function Home() {
           }
         : {
             to: {
-              y: "48%",
+              y: "90%",
             },
           },
     [show]
@@ -78,7 +95,10 @@ export default function Home() {
   const updateNextLocation = useCallback<
     (l: string) => [number, number] | null
   >((location) => {
-    const decoded = window.OpenLocationCode.decode(location);
+    let decoded;
+    try {
+      decoded = window.OpenLocationCode.decode(location);
+    } catch {}
     if (decoded) {
       const { latitudeCenter: lat, longitudeCenter: lon } = decoded;
       setNextLocation([lat, lon]);
@@ -96,7 +116,7 @@ export default function Home() {
           return new Promise((r) => {
             api.start({
               to: {
-                y: "48%",
+                y: "90%",
               },
               onResolve: () => {
                 const coords = updateNextLocation(clue.location);
@@ -118,6 +138,11 @@ export default function Home() {
   };
 
   const [running, setRunning] = useState(false);
+
+  const swipeHandlers = useSwipeable({
+    onSwipedUp: () => setShow(true),
+    onSwipedDown: () => setShow(false),
+  });
 
   useEffect(() => {
     setCenter([coords?.latitude ?? 0, coords?.longitude ?? 0]);
@@ -154,19 +179,26 @@ export default function Home() {
           <Image src="/idle outline.gif" width={21} height={35} alt="" />
         </Marker>
       </Map>
-      <animated.div onClick={() => setShow((s) => !s)} style={springs}>
-        <div className="md:hidden">
-          <Menu
-            clue={clue}
-            onSubmit={onSubmit}
-            recenter={() => setCenter(currentPos)}
-            goToDestination={() => setCenter(nextLocation)}
-            isRunning={running}
-            setRunning={setRunning}
-            isWithinRange={isWithinRange}
-          />
+      <div className="md:hidden h-screen fixed right-2 flex">
+        <div className="flex-1 relative">
+          <animated.div
+            {...swipeHandlers}
+            className="absolute bottom-0 right-0"
+            style={springs}
+          >
+            <Menu
+              clue={clue}
+              onSubmit={onSubmit}
+              recenter={() => setCenter(currentPos)}
+              goToDestination={() => setCenter(nextLocation)}
+              isRunning={running}
+              setRunning={setRunning}
+              isWithinRange={isWithinRange}
+              currentQuestion={currentQuestion}
+            />
+          </animated.div>
         </div>
-      </animated.div>
+      </div>
       <div className="hidden md:block">
         <Menu
           clue={clue}
@@ -176,6 +208,7 @@ export default function Home() {
           isRunning={running}
           setRunning={setRunning}
           isWithinRange={isWithinRange}
+          currentQuestion={currentQuestion}
         />
       </div>
     </div>
