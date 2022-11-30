@@ -5,8 +5,10 @@ import { animated, useSpring } from "@react-spring/web";
 import { useEffect, useState } from "react";
 import { Menu } from "../components/Menu";
 import Head from "next/head";
+import { useRouter } from "next/router";
 
 export default function Home() {
+  const { query } = useRouter();
   const { coords } = useGeolocated();
 
   const currentPos: [number, number] = [

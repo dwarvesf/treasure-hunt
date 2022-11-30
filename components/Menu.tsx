@@ -5,6 +5,7 @@ import { CharacterAnimation } from "./CharacterAnimation";
 export const Menu = (props: any) => {
   const [value, setValue] = useState("");
 
+  const clue = props.clue;
   return (
     <div
       onClick={(e) => {
@@ -21,55 +22,97 @@ export const Menu = (props: any) => {
           Question
         </p>
         <label className="font-medium mt-2 text-center text-xl md:text-2xl">
-          &ldquo;This is the question that you need to answer&rdquo;
+          {clue?.clue?.question ? (
+            <>&ldquo;{clue.clue.question}&rdquo;</>
+          ) : (
+            "You've answered all questions"
+          )}
         </label>
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            props?.onSubmit(value);
+            const form = e.target as HTMLFormElement;
+            const input = form.getElementsByTagName("input")[0];
+            if (clue?.clue?.id) {
+              input.disabled = true;
+              const correctAnswer = await props?.onSubmit(clue.clue.id, value);
+              input.disabled = false;
+              if (correctAnswer) {
+                setValue("");
+                input.classList.remove("input-error");
+                input.classList.add("input-normal");
+              } else {
+                input.select();
+                input.classList.remove("input-normal");
+                input.classList.add("input-error");
+                input?.classList.toggle("animate-wiggle");
+                setTimeout(() => {
+                  input?.classList.toggle("animate-wiggle");
+                }, 500);
+              }
+            }
           }}
           onClick={(e) => e.stopPropagation()}
-          className="flex flex-col mx-auto mt-4"
+          className="flex flex-col w-2/3 mx-auto mt-4"
         >
           <input
             value={value}
             onChange={(e) => setValue(e.target.value)}
             type="text"
             id="answer"
-            className="py-1 shadow-sm rounded-md border-gray-300 focus:border-indigo-300 focus:ring-indigo-200 focus:ring-opacity-50"
+            className="input-normal w-full py-1 shadow-sm rounded-md border-gray-300 focus:ring-opacity-50"
           />
-          <button
-            className="bg-brand rounded px-2 py-1 text-white mx-auto mt-2 text-sm"
-            type="submit"
-          >
-            Submit answer
-          </button>
+          <div className="flex space-3">
+            <button
+              className="bg-brand rounded px-2 py-1 text-white mx-auto mt-2 text-sm"
+              type="submit"
+            >
+              Submit answer
+            </button>
+            <button
+              onClick={props?.recenter}
+              className="hover:underline px-2 py-1 text-foreground mx-auto mt-2 text-sm"
+              type="button"
+            >
+              Where am I?
+            </button>
+          </div>
         </form>
       </div>
       <div className="w-full h-px bg-slate-300" />
       <div className="py-4 px-5 flex flex-col bg-gray-50 flex-1">
-        <Stepper.Container current={1} loading={false}>
-          <Stepper.Step num={1} title="Destination 1">
-            Q: Question
-            <br />
-            A: Answer
-          </Stepper.Step>
-          <Stepper.Step num={2} title="Destination 2">
-            Q: Question
-            <br />
-            A: Answer
-          </Stepper.Step>
-          <Stepper.Step num={3} title="Destination 3">
-            Q: Question
-            <br />
-            A: Answer
-          </Stepper.Step>
-          <Stepper.Step num={4} title="Destination 4">
-            Q: Question
-            <br />
-            A: Answer
-          </Stepper.Step>
-        </Stepper.Container>
+        {clue ? (
+          <Stepper.Container
+            current={Math.min(4, clue.finished?.length ?? 0) + 1}
+            loading={false}
+          >
+            {Array(4)
+              .fill(0)
+              .map((_, i) => {
+                const isCurrentQuestion = (clue.finished?.length ?? 0) === i;
+                return (
+                  <Stepper.Step
+                    key={`clue-${i}`}
+                    num={i + 1}
+                    title={
+                      isCurrentQuestion
+                        ? clue.clue?.location_name
+                        : clue.finished?.[i]?.location_name ??
+                          "Unknown location"
+                    }
+                  >
+                    {isCurrentQuestion
+                      ? "Go to this location to unlock the question"
+                      : `Q: ${clue.finished?.[i]?.question ?? "????"}`}
+                    <br />
+                    {isCurrentQuestion
+                      ? null
+                      : `A: ${clue.finished?.[i]?.answer ?? "????"}`}
+                  </Stepper.Step>
+                );
+              })}
+          </Stepper.Container>
+        ) : null}
       </div>
       <div className="bg-gray-50">
         <CharacterAnimation isRunning={props.isRunning} />

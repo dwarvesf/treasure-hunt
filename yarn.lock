@@ -1741,6 +1741,11 @@ pigeon-maps@^0.21.3:
   resolved "https://registry.yarnpkg.com/pigeon-maps/-/pigeon-maps-0.21.3.tgz#a15c44e5f179c56a2560993b3660296d184c3d6c"
   integrity sha512-NbzISHHvMrcYBMBJ6NSSdTC1iGshSYOvsql9AqBfsE7KXni9xFIV9dkIWAfkKGCbafZ/0JysWZSp7zfg2piOFg==
 
+pluscodes@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/pluscodes/-/pluscodes-2.6.0.tgz#55cb7873ffc2e1fbcc3a257f51f3c604f73a032e"
+  integrity sha512-+3sW+Qt+znuN2uMFFvebo2m5MsaTjBXOzEYvkfx4RMeOYnNCQv3OWeQujfRAo6nzg7D+5vD2b3tihtwW3b5pfg==
+
 postcss-import@^14.1.0:
   version "14.1.0"
   resolved "https://registry.yarnpkg.com/postcss-import/-/postcss-import-14.1.0.tgz#a7333ffe32f0b8795303ee9e40215dac922781f0"

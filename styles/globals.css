@@ -5,3 +5,11 @@
 body {
   font-family: "IBM Plex Sans", sans-serif;
 }
+
+.input-normal {
+  @apply focus:border-indigo-300 focus:ring-indigo-200;
+}
+
+.input-error {
+  @apply focus:border-red-300 focus:ring-red-200;
+}
