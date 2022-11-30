@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fontsource/bungee-shade": "^4.5.10",
     "@fontsource/ibm-plex-sans": "^4.5.13",
     "@heroicons/react": "^2.0.13",
     "@react-spring/web": "^9.5.5",

@@ -32,6 +32,16 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
+"@fontsource/bungee-outline@^4.5.8":
+  version "4.5.8"
+  resolved "https://registry.yarnpkg.com/@fontsource/bungee-outline/-/bungee-outline-4.5.8.tgz#9eb10a317e9d35b5941907ca1e4d9b7911605948"
+  integrity sha512-blGF6CzWsJUjba6N9zVlKNH2N4D2kCy5I/sFhx/KVIriCyoNTrnTgOovmH03R+Sej9iHjVvDQmAvKPpeRtif1Q==
+
+"@fontsource/bungee-shade@^4.5.10":
+  version "4.5.10"
+  resolved "https://registry.yarnpkg.com/@fontsource/bungee-shade/-/bungee-shade-4.5.10.tgz#52304513b4e2877b56f69946e011080ad17fbc39"
+  integrity sha512-sWGOtul91yQN7ft2H1iMZa8tEW4d79l/y16gqz6USnSbepesBF72UmLS+uRYxak97DQmR/RwuA2f8hJODlbU1A==
+
 "@fontsource/ibm-plex-sans@^4.5.13":
   version "4.5.13"
   resolved "https://registry.yarnpkg.com/@fontsource/ibm-plex-sans/-/ibm-plex-sans-4.5.13.tgz#fa0ef72a2ccf4b4329c488212f31ef4e6770983d"

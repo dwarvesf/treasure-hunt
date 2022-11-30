@@ -16,6 +16,8 @@ const Ground = (props: any) => {
 
 export const CharacterAnimation = (props: any) => {
   const [ref, bounds] = useMeasure();
+  const scale = props.scale ?? 1;
+  const imageScale = bounds.width / (160 * scale);
   return (
     <div ref={ref}>
       <Image
@@ -23,11 +25,17 @@ export const CharacterAnimation = (props: any) => {
         height={props.isRunning ? 34 : 35}
         alt=""
         src={props.isRunning ? "/run outline.gif" : "/idle outline.gif"}
-        style={{ transform: `scale(${bounds.width / 160})` }}
+        style={{
+          transform: `scale(${imageScale})`,
+        }}
         className="mx-auto relative z-10"
       />
-      <Marquee gradient={false} speed={75} play={Boolean(props.isRunning)}>
-        <Ground scale={bounds.width / 160} />
+      <Marquee gradient={false} speed={200} play={Boolean(props.isRunning)}>
+        {Array(scale)
+          .fill(0)
+          .map((_, i) => {
+            return <Ground key={`ground-${i}`} scale={imageScale} />;
+          })}
       </Marquee>
     </div>
   );
