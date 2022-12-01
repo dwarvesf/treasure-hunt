@@ -58,7 +58,7 @@ export default function Home() {
     return false;
   }, [currentPos, nextLocation]);
 
-  const { data: currentQuestion } = useSWR(
+  const { data: questions } = useSWR(
     [
       "/questions",
       isWithinRange,
@@ -67,8 +67,8 @@ export default function Home() {
     ],
     async (_, isWithinRange, teamId, questionCode) => {
       if (isWithinRange && teamId && questionCode) {
-        const res = await API.getQuestion(teamId as string, questionCode);
-        return res?.data?.content ?? null;
+        const res: any = await API.getQuestion(teamId as string, questionCode);
+        return res?.data ?? null;
       }
       return null;
     }
@@ -76,20 +76,18 @@ export default function Home() {
 
   const [show, setShow] = useState(false);
 
-  const [springs, api] = useSpring(
-    () =>
-      show
-        ? {
-            to: {
-              y: "0%",
-            },
-          }
-        : {
-            to: {
-              y: "90%",
-            },
+  const springs = useSpring(
+    show
+      ? {
+          to: {
+            y: "0%",
           },
-    [show]
+        }
+      : {
+          to: {
+            y: "90%",
+          },
+        }
   );
 
   const updateNextLocation = useCallback<
@@ -107,27 +105,18 @@ export default function Home() {
     return null;
   }, []);
 
-  const onSubmit = async (clueId: string, answer: string) => {
-    const answerRes = await API.answerClue(clueId, answer);
+  const onSubmit = async (clueId: string, answers: Array<string>) => {
+    const answerRes = await API.answerClue(clueId, answers);
     if (answerRes?.success) {
       return refreshTeam().then((newClue) => {
         const clue = newClue?.data?.clue;
         if (clue) {
-          return new Promise((r) => {
-            api.start({
-              to: {
-                y: "90%",
-              },
-              onResolve: () => {
-                const coords = updateNextLocation(clue.location);
-                if (coords) {
-                  setCenter(coords);
-                  r(true);
-                }
-                r(false);
-              },
-            });
-          });
+          const coords = updateNextLocation(clue.location);
+          if (coords) {
+            setCenter(coords);
+            return true;
+          }
+          return false;
         } else if (newClue?.data?.status === "completed") {
           return true;
         }
@@ -167,7 +156,6 @@ export default function Home() {
         defaultZoom={18}
         attribution={false}
         animateMaxScreens={30}
-        onAnimationStop={() => api.start({ to: { y: "0%" } })}
         onBoundsChanged={({ center }) => {
           setCenter(center);
           setRunning(true);
@@ -194,7 +182,7 @@ export default function Home() {
               isRunning={running}
               setRunning={setRunning}
               isWithinRange={isWithinRange}
-              currentQuestion={currentQuestion}
+              questions={questions}
             />
           </animated.div>
         </div>
@@ -208,7 +196,7 @@ export default function Home() {
           isRunning={running}
           setRunning={setRunning}
           isWithinRange={isWithinRange}
-          currentQuestion={currentQuestion}
+          questions={questions}
         />
       </div>
     </div>

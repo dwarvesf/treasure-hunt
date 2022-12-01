@@ -16,11 +16,11 @@ function getQuestion(teamId: string, questionCode: string) {
     .catch(() => null);
 }
 
-function answerClue(clueId: string | number, answer: string) {
-  if (!answer) return null;
+function answerClue(clueId: string | number, answers: Array<string>) {
+  if (!answers) return null;
   return fetch(`${BASE_URL}/api/clues/${clueId}/answer`, {
     method: "POST",
-    body: JSON.stringify({ answer }),
+    body: JSON.stringify({ answers }),
     headers: {
       "Content-Type": "application/json",
     },
